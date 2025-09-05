@@ -1,0 +1,108 @@
+{
+  "version": "0.2",
+  "meta": {
+    "source_lang": "OpenCL"
+  },
+  "ops": [
+    {
+      "op": "DeviceSelect",
+      "device": "auto"
+    },
+    {
+      "op": "Comment",
+      "text": "kernel k -> saxpy"
+    },
+    {
+      "op": "DeviceMalloc",
+      "dst": "&dA",
+      "bytes": "N*sizeof(float)"
+    },
+    {
+      "op": "DeviceMalloc",
+      "dst": "&dB",
+      "bytes": "N*sizeof(float)"
+    },
+    {
+      "op": "DeviceMalloc",
+      "dst": "&dC",
+      "bytes": "N*sizeof(float)"
+    },
+    {
+      "op": "Memcpy",
+      "dst": "dA",
+      "src": "hA",
+      "bytes": "N*sizeof(float)",
+      "kind": "H2D"
+    },
+    {
+      "op": "Memcpy",
+      "dst": "dB",
+      "src": "hB",
+      "bytes": "N*sizeof(float)",
+      "kind": "H2D"
+    },
+    {
+      "op": "Comment",
+      "text": "setarg k[0]=dA"
+    },
+    {
+      "op": "Comment",
+      "text": "setarg k[1]=dB"
+    },
+    {
+      "op": "Comment",
+      "text": "setarg k[2]=dC"
+    },
+    {
+      "op": "Comment",
+      "text": "setarg k[3]=alpha"
+    },
+    {
+      "op": "Comment",
+      "text": "setarg k[4]=N"
+    },
+    {
+      "op": "KernelLaunch",
+      "kernel": "saxpy",
+      "grid": [
+        "&global",
+        "1",
+        "1"
+      ],
+      "block": [
+        "&local",
+        "1",
+        "1"
+      ],
+      "args": [
+        "dA",
+        "dB",
+        "dC",
+        "alpha",
+        "N"
+      ]
+    },
+    {
+      "op": "Memcpy",
+      "dst": "hC",
+      "src": "dC",
+      "bytes": "N*sizeof(float)",
+      "kind": "D2H"
+    },
+    {
+      "op": "DeviceSynchronize"
+    },
+    {
+      "op": "DeviceFree",
+      "ptr": "dA"
+    },
+    {
+      "op": "DeviceFree",
+      "ptr": "dB"
+    },
+    {
+      "op": "DeviceFree",
+      "ptr": "dC"
+    }
+  ]
+}

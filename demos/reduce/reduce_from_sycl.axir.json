@@ -1,0 +1,56 @@
+{
+  "version": "0.2",
+  "meta": {
+    "source_lang": "SYCL"
+  },
+  "ops": [
+    {
+      "op": "DeviceSelect",
+      "device": "auto"
+    },
+    {
+      "op": "Memcpy",
+      "dst": "dA",
+      "src": "hA",
+      "bytes": "N * sizeof(float",
+      "kind": "H2D"
+    },
+    {
+      "op": "KernelLaunch",
+      "kernel": "reduce_sum",
+      "grid": [
+        "N",
+        "1",
+        "1"
+      ],
+      "block": [
+        "N",
+        "1",
+        "1"
+      ],
+      "args": [
+        "dA",
+        "dOut",
+        "N"
+      ]
+    },
+    {
+      "op": "Memcpy",
+      "dst": "hOut",
+      "src": "dOut",
+      "bytes": "sizeof(float",
+      "kind": "D2H"
+    },
+    {
+      "op": "DeviceSynchronize"
+    },
+    {
+      "op": "DeviceFree",
+      "ptr": "dA"
+    },
+    {
+      "op": "DeviceFree",
+      "ptr": "dOut"
+    }
+  ]
+}

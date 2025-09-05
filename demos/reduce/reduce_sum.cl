@@ -1,0 +1,12 @@
+cl_kernel k = clCreateKernel(program, "reduce_sum", &err);
+cl_mem dA = clCreateBuffer(ctx, CL_MEM_READ_ONLY,  N*sizeof(float), NULL, &err);
+cl_mem dOut = clCreateBuffer(ctx, CL_MEM_WRITE_ONLY, sizeof(float), NULL, &err);
+clEnqueueWriteBuffer(q, dA, CL_TRUE, 0, N*sizeof(float), hA, 0, NULL, NULL);
+clSetKernelArg(k, 0, sizeof(cl_mem), &dA);
+clSetKernelArg(k, 1, sizeof(cl_mem), &dOut);
+clSetKernelArg(k, 2, sizeof(int),    &N);
+size_t global=N, local=N;
+clEnqueueNDRangeKernel(q, k, 1, NULL, &global, &local, 0, NULL, NULL);
+clEnqueueReadBuffer(q, dOut, CL_TRUE, 0, sizeof(float), hOut, 0, NULL, NULL);
+clFinish(q);
+clReleaseMemObject(dA); clReleaseMemObject(dOut);

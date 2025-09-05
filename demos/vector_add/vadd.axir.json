@@ -1,0 +1,31 @@
+{
+  "version": "0.2",
+  "meta": { "source_lang": "AXIR", "entry": "vector_add" },
+  "types": {
+    "buffers": {
+      "hA": { "dtype": "f32", "shape": ["N"], "location": "host" },
+      "hB": { "dtype": "f32", "shape": ["N"], "location": "host" },
+      "hC": { "dtype": "f32", "shape": ["N"], "location": "host" },
+      "dA": { "dtype": "f32", "shape": ["N"], "location": "device" },
+      "dB": { "dtype": "f32", "shape": ["N"], "location": "device" },
+      "dC": { "dtype": "f32", "shape": ["N"], "location": "device" }
+    },
+    "scalars": { "N": { "dtype": "i32", "value": 16 } }
+  },
+  "ops": [
+    { "op": "DeviceMalloc", "dst": "&dA", "bytes": "N*4" },
+    { "op": "DeviceMalloc", "dst": "&dB", "bytes": "N*4" },
+    { "op": "DeviceMalloc", "dst": "&dC", "bytes": "N*4" },
+
+    { "op": "Memcpy", "dst": "dA", "src": "hA", "bytes": "N*4", "kind": "H2D" },
+    { "op": "Memcpy", "dst": "dB", "src": "hB", "bytes": "N*4", "kind": "H2D" },
+
+    { "op": "KernelLaunch", "kernel": "vector_add", "grid": ["N","1","1"], "block": ["N","1","1"], "args": ["dA","dB","dC","N"] },
+
+    { "op": "Memcpy", "dst": "hC", "src": "dC", "bytes": "N*4", "kind": "D2H" },
+
+    { "op": "DeviceFree", "ptr": "dA" },
+    { "op": "DeviceFree", "ptr": "dB" },
+    { "op": "DeviceFree", "ptr": "dC" }
+  ]
+}

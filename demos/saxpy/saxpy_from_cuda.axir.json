@@ -1,0 +1,84 @@
+{
+  "version": "0.2",
+  "meta": {
+    "source_lang": "CUDA"
+  },
+  "ops": [
+    {
+      "op": "DeviceSelect",
+      "device": "auto"
+    },
+    {
+      "op": "DeviceMalloc",
+      "dst": "&dA",
+      "bytes": "N*sizeof(float"
+    },
+    {
+      "op": "DeviceMalloc",
+      "dst": "&dB",
+      "bytes": "N*sizeof(float"
+    },
+    {
+      "op": "DeviceMalloc",
+      "dst": "&dC",
+      "bytes": "N*sizeof(float"
+    },
+    {
+      "op": "Memcpy",
+      "dst": "dA",
+      "src": "hA",
+      "bytes": "N*sizeof(float)",
+      "kind": "H2D"
+    },
+    {
+      "op": "Memcpy",
+      "dst": "dB",
+      "src": "hB",
+      "bytes": "N*sizeof(float)",
+      "kind": "H2D"
+    },
+    {
+      "op": "KernelLaunch",
+      "kernel": "saxpy",
+      "grid": [
+        "N",
+        "1",
+        "1"
+      ],
+      "block": [
+        "N",
+        "1",
+        "1"
+      ],
+      "args": [
+        "dA",
+        "dB",
+        "dC",
+        "alpha",
+        "N"
+      ]
+    },
+    {
+      "op": "Memcpy",
+      "dst": "hC",
+      "src": "dC",
+      "bytes": "N*sizeof(float)",
+      "kind": "D2H"
+    },
+    {
+      "op": "DeviceSynchronize"
+    },
+    {
+      "op": "DeviceFree",
+      "ptr": "dA"
+    },
+    {
+      "op": "DeviceFree",
+      "ptr": "dB"
+    },
+    {
+      "op": "DeviceFree",
+      "ptr": "dC"
+    }
+  ]
+}
