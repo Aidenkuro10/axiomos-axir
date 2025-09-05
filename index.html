@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AXIR — Universal IR for GPU/AI Code</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f9fafb;
+      color: #111;
+      line-height: 1.6;
+    }
+    header {
+      background: #111;
+      color: #fff;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+    header h1 { margin: 0; font-size: 1.8rem; }
+    nav a {
+      color: #fff;
+      margin: 0 1rem;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: white;
+    }
+    .hero h2 { font-size: 2.2rem; margin-bottom: 1rem; }
+    .hero p { font-size: 1.2rem; margin-bottom: 2rem; }
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 1.6rem;
+      margin: 0.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-secondary { background: white; color: #2563eb; border: 2px solid #2563eb; }
+    section {
+      padding: 3rem 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+    section h3 { font-size: 1.6rem; margin-bottom: 1rem; }
+    .diagram {
+      text-align: center;
+      margin: 2rem 0;
+    }
+    footer {
+      background: #111;
+      color: #aaa;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>AXIOMOS</h1>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#demo">Demo</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h2>AXIR — Universal IR for GPU/AI Code</h2>
+    <p>Write in CUDA, HIP, SYCL, OpenCL. Run anywhere.</p>
+    <a href="https://github.com/AidenKuro10/axiomos-axir" class="btn btn-primary">🌐 GitHub Repo</a>
+    <a href="https://docs.google.com/forms/d/TON_FORM_ID/viewform" class="btn btn-secondary">✉ Contact Me</a>
+  </div>
+
+  <section id="about">
+    <h3>Why AXIR?</h3>
+    <p>
+      Every GPU vendor has its own locked ecosystem:
+      NVIDIA (CUDA), AMD (HIP), Intel (SYCL/oneAPI), and Khronos (OpenCL).
+      Normally, code written in one ecosystem doesn’t run in another.
+    </p>
+    <p>
+      AXIR is a universal intermediate representation (IR) that makes GPU/AI
+      code portable without rewrites.
+    </p>
+    <div class="diagram">
+      <img src="https://i.imgur.com/XHVGWRP.png" alt="AXIR pipeline diagram" width="500">
+    </div>
+  </section>
+
+  <section id="demo">
+    <h3>Proof of Concept v0.5</h3>
+    <ul>
+      <li><b>Frontends:</b> CUDA, HIP, OpenCL, SYCL</li>
+      <li><b>Backend:</b> CPU (NumPy)</li>
+      <li><b>Kernels:</b> Vector Add, Saxpy, Reduce Sum</li>
+    </ul>
+    <p>
+      All 12 combinations (4 languages × 3 kernels) run successfully:
+    </p>
+    <pre>
+vector_add → [0, 3, 6, 9, 12]
+saxpy      → [0, 4, 8, 12, 16]
+reduce_sum → 120.0
+    </pre>
+  </section>
+
+  <section id="contact">
+    <h3>Get in Touch</h3>
+    <p>
+      Interested in collaboration, research, or investment?
+    </p>
+    <a href="https://docs.google.com/forms/d/TON_FORM_ID/viewform" class="btn btn-primary">📩 Contact Form</a>
+  </section>
+
+  <footer>
+    © 2025 Axiomos — AXIR Project
+  </footer>
+
+</body>
+</html>
+
