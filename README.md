@@ -35,9 +35,7 @@ Other projects address parts of this challenge:
 - `matmul` (matrix multiplication)
 - `conv1d` (1D convolution, basic prototype)
 
----
-
-## Compatibility Matrix (PoC)
+---## Compatibility Matrix (PoC)
 
 | Frontend ↓ | CPU backend | GPU-stub backend |
 |------------|-------------|------------------|
@@ -113,28 +111,33 @@ CPU & GPU-stub executions with numeric outputs
 
 Per-stage timings (measured, not mocked)
 
-Benchmarks
-AXIR demonstrates that the same computation kernels (CUDA/HIP) can be translated into a unified IR and executed across multiple backends, producing correct results with reproducible timings.
+## Benchmarks
 
-We evaluated AXIR on multiple kernels translated from CUDA and HIP, executed on two backends:
+AXIR demonstrates that **the same computation kernels (CUDA/HIP)** can be translated into a **unified IR** and executed across multiple backends, producing correct results with reproducible timings.
 
-CPU backend: NumPy-based interpreter (reference execution).
+We evaluated **AXIR** on multiple kernels translated from CUDA and HIP, executed on two backends:
 
-GPU-stub backend: GPU API simulation (uses CuPy if available, otherwise falls back to NumPy).
+- **CPU** backend: NumPy-based interpreter (reference execution).  
+- **GPU-stub** backend: GPU API simulation (uses CuPy if available, otherwise falls back to NumPy).  
 
-Each kernel was run 7 times to capture variability.
-Results are reported as mean ± standard deviation (in milliseconds).
+Each kernel was run **7 times** to capture variability.  
+Results are reported as **mean ± standard deviation** (in milliseconds).  
+Numbers may vary slightly depending on machine load and environment.
 
-Results (7 runs)
+### Results (7 runs)
+
 <!-- auto-generated via `python cli/axirc.py bench --runs 7` -->
-Kernel	Frontend	CPU (ms)	GPU-stub (ms)
-vector_add	CUDA	162.6 ± 8.8	 160.7 ± 10.1
-saxpy	HIP	156.7 ± 8.9 	158.1 ± 7.5
-reduce_sum	HIP	149.1 ± 4.8 	149.2 ± 2.8
+| Kernel      | Frontend | CPU (ms)       | GPU-stub (ms)   |
+|-------------|----------|----------------|-----------------|
+| vector_add  | CUDA     | 162.6 ± 8.8    | 160.7 ± 10.1    |
+| saxpy       | HIP      | 156.7 ± 8.9    | 158.1 ± 7.5     |
+| reduce_sum  | HIP      | 149.1 ± 4.8    | 149.2 ± 2.8     |
 
-Visualization
+### Visualization
+
 The bar plot shows average execution time per kernel, with error bars representing standard deviation.
 
+![AXIR Bench](build/axir_bench.png)
 
 
 Roadmap
