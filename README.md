@@ -98,6 +98,31 @@ python cli/axirc.py demo-prebaked --kernel conv1d     --frontend axir
 - CPU & GPU-stub executions with numeric outputs
 - Per-stage timings (not just prints)
 
+## Benchmarks
+
+We evaluated **AXIR** on multiple kernels translated from CUDA and HIP, executed on two backends:
+
+- **CPU** backend: NumPy-based interpreter (reference execution).
+- **GPU-stub** backend: GPU API simulation (uses CuPy if available, otherwise falls back to NumPy).
+
+Each kernel was run **7 times** to capture variability.  
+Results are reported as **mean ± standard deviation** (in milliseconds).
+
+### Results (7 runs)
+
+<!-- auto-generated via `python cli/axirc.py bench --runs 7` -->
+| Kernel      | Frontend | CPU (ms)       | GPU-stub (ms)   |
+|-------------|----------|----------------|-----------------|
+| vector_add  | CUDA     | … ± …          | … ± …           |
+| saxpy       | HIP      | … ± …          | … ± …           |
+| reduce_sum  | HIP      | … ± …          | … ± …           |
+
+### Visualization
+
+The bar plot below shows the average execution time per kernel, with error bars representing standard deviation.
+
+![AXIR Bench](build/axir_bench.png)
+
 
 Roadmap
 
