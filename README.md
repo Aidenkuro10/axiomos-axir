@@ -75,6 +75,30 @@ axirc translate --in demos/saxpy/saxpy.cu --lang cuda --out build/saxpy.axir.jso
 axirc run --in build/saxpy.axir.json --backend cpu
 axirc run --in build/saxpy.axir.json --backend gpu-stub
 
+## Quick demos (local, no Colab)
+
+# Live translation → AXIR → run (shows AXIR snippet + timings)
+python cli/axirc.py demo --kernel vector_add --frontend cuda
+python cli/axirc.py demo --kernel reduce_sum --frontend hip
+python cli/axirc.py demo --kernel vector_add --frontend opencl
+python cli/axirc.py demo --kernel vector_add --frontend sycl
+
+# Prebaked AXIR → run (fast path)
+python cli/axirc.py demo-prebaked --kernel vector_add --frontend cuda
+python cli/axirc.py demo-prebaked --kernel vector_add --frontend hip
+python cli/axirc.py demo-prebaked --kernel vector_add --frontend opencl
+python cli/axirc.py demo-prebaked --kernel vector_add --frontend sycl
+python cli/axirc.py demo-prebaked --kernel saxpy      --frontend hip
+python cli/axirc.py demo-prebaked --kernel reduce_sum --frontend hip
+python cli/axirc.py demo-prebaked --kernel matmul     --frontend axir
+python cli/axirc.py demo-prebaked --kernel conv1d     --frontend axir
+
+**What you see:** 
+- Generated AXIR JSON snippet (proves the IR pivot)
+- CPU & GPU-stub executions with numeric outputs
+- Per-stage timings (not just prints)
+
+
 Roadmap
 
 0–6 weeks (Core)
