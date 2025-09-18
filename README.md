@@ -1,171 +1,152 @@
-# AXIR — A Universal IR for GPU/AI Code
+AXIR — A Universal IR for GPU/AI Code (PoC)
 
-AXIR is a proof-of-concept **universal intermediate representation (IR)**  
-designed to make GPU kernels portable across ecosystems.
+Run unmodified CUDA/HIP kernels on multiple backends.
+AXIR is a minimal intermediate representation (IR) and runtime harness that lets you translate once and execute across devices.
 
-Write your code in **CUDA (NVIDIA)**, **HIP (AMD)**, **OpenCL (Khronos)**, or **SYCL (Intel/oneAPI)**.  
-Translate it once into AXIR. Run it anywhere.
+Frontends (today): CUDA, HIP (live); OpenCL, SYCL (prebaked AXIR demos)
 
----
+Backends (today): CPU (NumPy, reference) and OpenCL GPU (tested on Intel iGPU)
 
-## Why AXIR?
+Kernels covered: vector_add, saxpy, reduce_sum, matmul
 
-**Why not just use OpenCL?**  
-OpenCL forces developers to rewrite code in its own C-like kernel language.  
-AXIR is different: you keep writing in CUDA, HIP, OpenCL, or SYCL.  
-AXIR acts as a translator layer, making your code portable *without rewrites*.
+Verification: buffer-level CPU ↔ GPU checks with configurable tolerances and timing
 
-Other projects address parts of this challenge:
-- **LLVM IR / MLIR** — powerful compiler IRs, but not designed as a lightweight GPU pivot.  
-- **Triton** — high-level DSL for kernels, but vendor-specific.  
-- **oneAPI / SYCL** — Intel ecosystem, not universal.  
+Goal: a neutral compute layer for AI — a lightweight pivot IR + runtimes that break vendor lock-in.
 
-👉 AXIR focuses on one simple goal: **a minimal pivot IR across all vendor ecosystems**.
+Why AXIR?
 
----
+Existing paths are powerful but fragmented:
 
-## Current Status (PoC v0.6)
+Write once in vendor languages (CUDA/HIP/OpenCL/SYCL) → translate to AXIR → run on different backends.
 
-✅ **Frontends**: CUDA, HIP, OpenCL, SYCL  
-✅ **Backends**: CPU (NumPy), GPU stub (simulation, CuPy if available)  
-✅ **Kernels supported**:
-- `vector_add`
-- `saxpy` (C = α*A + B)
-- `reduce_sum` (sum(A))
-- `matmul` (matrix multiplication)
-- `conv1d` (1D convolution, basic prototype)
+Unlike “just use OpenCL/SYCL”, AXIR lets teams keep their existing CUDA/HIP kernels and run them elsewhere with minimal changes.
 
----## Compatibility Matrix (PoC)
+Compared to general IRs (LLVM/MLIR) or DSLs (Triton), AXIR is a tiny, pragmatic pivot focused on portability + runnable demos.
 
-| Frontend ↓ | CPU backend | GPU-stub backend |
-|------------|-------------|------------------|
-| CUDA       | ✅ (5/5)    | ✅ (5/5)         |
-| HIP        | ✅ (5/5)    | ✅ (5/5)         |
-| OpenCL     | ✅ (5/5)    | ✅ (5/5)         |
-| SYCL       | ✅ (5/5)    | ✅ (5/5)         |
+What works today (PoC)
 
-All **20 combinations** (4 frontends × 5 kernels) successfully translate into AXIR and run on CPU and GPU-stub, producing the expected results.
+✅ Live frontends: CUDA, HIP → AXIR JSON
 
----
+✅ Prebaked AXIR demos: from CUDA/HIP/OpenCL/SYCL for quick runs
 
-## Demo (GUI)
+✅ Backends:
 
-Launch the one-button demo:
+CPU (NumPy): reference execution
 
-```bash
-# Windows
-py -3 axir_demo_gui.py
-# Linux/macOS
-python3 axir_demo_gui.py
-You’ll see a window. Click ▶ Run Full AXIR Demo.
-It will sequentially run:
+OpenCL GPU: real device execution (uses PyOpenCL; works on Intel iGPU; falls back to first OpenCL device)
 
-nginx
-Copier le code
-CUDA / HIP / OpenCL / SYCL  →  AXIR  →  CPU + GPU-stub
-Expected outputs (examples):
+✅ Kernels: vector_add, saxpy, reduce_sum, matmul
 
-vector_add → hC = [0, 3, 6, 9, 12]
+✅ Verification & timing: compare host buffers (e.g., hC, hOut) across backends; --time --warmup --repeat for stable medians
 
-saxpy → hC = [0, 4, 8, 12, 16]
+What this PoC is not (yet): production codegen (PTX/SPIR-V), full CUDA runtime emulation, or a wide kernel library.
 
-reduce_sum → hOut = 120.0
+Requirements
 
-matmul → hC[0:2,0:2] = [[19, 22], [43, 50]]
+Python 3.10+
 
-conv1d → hOut[0:2,0:2] = [[4, 8], [12, 16]]
+numpy, pyopencl (pip install numpy pyopencl)
 
-Demo (CLI)
-Step-by-step execution:
+An OpenCL runtime/driver (GPU or CPU OpenCL device).
 
-# Example: CUDA saxpy → AXIR → CPU
-python frontends/cuda_frontend.py demos/saxpy/saxpy.cu -o demos/saxpy/saxpy_from_cuda.axir.json
-python backends/cpu_numpy_backend.py demos/saxpy/saxpy_from_cuda.axir.json --summary
-Unified CLI (in progress):
+Windows/Linux/macOS ok; PoC validated on Windows with Intel iGPU.
 
-axirc translate --in demos/saxpy/saxpy.cu --lang cuda --out build/saxpy.axir.json
-axirc run --in build/saxpy.axir.json --backend cpu
-axirc run --in build/saxpy.axir.json --backend gpu-stub
-Quick Demos (local, no Colab)
-Live translation → AXIR → run (shows AXIR snippet + timings)
+Quickstart
+# List detected devices (CPU/OpenCL/CUDA if present)
+python -m cli.axirc device-list
 
-python cli/axirc.py demo --kernel vector_add --frontend cuda
-python cli/axirc.py demo --kernel reduce_sum --frontend hip
-python cli/axirc.py demo --kernel vector_add --frontend opencl
-python cli/axirc.py demo --kernel vector_add --frontend sycl
-Prebaked AXIR → run (fast path)
+Live demo (translate → run)
+# Generate AXIR from a toy frontend and run backends
+python -m cli.axirc demo --kernel vector_add --frontend cuda --summary --with-opencl
+python -m cli.axirc demo --kernel reduce_sum --frontend hip   --summary --with-opencl
 
-python cli/axirc.py demo-prebaked --kernel vector_add --frontend cuda
-python cli/axirc.py demo-prebaked --kernel vector_add --frontend hip
-python cli/axirc.py demo-prebaked --kernel vector_add --frontend opencl
-python cli/axirc.py demo-prebaked --kernel vector_add --frontend sycl
-python cli/axirc.py demo-prebaked --kernel saxpy      --frontend hip
-python cli/axirc.py demo-prebaked --kernel reduce_sum --frontend hip
-python cli/axirc.py demo-prebaked --kernel matmul     --frontend axir
-python cli/axirc.py demo-prebaked --kernel conv1d     --frontend axir
-What you see:
+Prebaked demos (fast path)
+# Runs AXIR JSONs included in build/ (no translator needed)
+python -m cli.axirc demo-prebaked --kernel vector_add --frontend cuda
+python -m cli.axirc demo-prebaked --kernel saxpy      --frontend hip
+python -m cli.axirc demo-prebaked --kernel reduce_sum --frontend hip
+python -m cli.axirc demo-prebaked --kernel matmul     --frontend axir
 
-Generated AXIR JSON snippet (proves the IR pivot)
+Run a specific AXIR on a backend
+python -m cli.axirc run --in build/vector_add_from_cuda.axir.json --backend cpu
+python -m cli.axirc run --in build/vector_add_from_cuda.axir.json --backend opencl
 
-CPU & GPU-stub executions with numeric outputs
+Verify correctness (CPU vs GPU) + timing
 
-Per-stage timings (measured, not mocked)
+We provide a harness to dump a chosen buffer from two backends, compare numerically, and (optionally) time multiple runs:
 
-## Benchmarks
+# List candidate buffers inside the AXIR file
+python -m cli.verify_axir build/saxpy_from_cuda.axir.json --list-buffers
 
-AXIR demonstrates that **the same computation kernels (CUDA/HIP)** can be translated into a **unified IR** and executed across multiple backends, producing correct results with reproducible timings.
+# Auto-pick a likely output buffer and verify CPU vs OpenCL
+python -m cli.verify_axir build/saxpy_from_cuda.axir.json --buffer auto \
+  --backend-a cpu --backend-b opencl
 
-We evaluated **AXIR** on multiple kernels translated from CUDA and HIP, executed on two backends:
+# Add timing with warmup and repeats (median)
+python -m cli.verify_axir build/vector_add_from_opencl.axir.json --buffer auto \
+  --backend-a cpu --backend-b opencl \
+  --time --warmup 2 --repeat 5
 
-- **CPU** backend: NumPy-based interpreter (reference execution).  
-- **GPU-stub** backend: GPU API simulation (uses CuPy if available, otherwise falls back to NumPy).  
 
-Each kernel was run **7 times** to capture variability.  
-Results are reported as **mean ± standard deviation** (in milliseconds).  
-Numbers may vary slightly depending on machine load and environment.
+Sample output:
 
-### Results (7 runs)
+---- RESULT ----
+SHAPES     : CPU(16,) vs OPENCL(16,)
+max_abs_err: 0.0
+ALLCLOSE   : True (atol=1e-06, rtol=0.0)
+CPU(head):    [0., 3., 6., 9., 12., 15., 18., 21.]
+OPENCL(head): [0., 3., 6., 9., 12., 15., 18., 21.]
 
-<!-- auto-generated via `python cli/axirc.py bench --runs 7` -->
-| Kernel      | Frontend | CPU (ms)       | GPU-stub (ms)   |
-|-------------|----------|----------------|-----------------|
-| vector_add  | CUDA     | 162.6 ± 8.8    | 160.7 ± 10.1    |
-| saxpy       | HIP      | 156.7 ± 8.9    | 158.1 ± 7.5     |
-| reduce_sum  | HIP      | 149.1 ± 4.8    | 149.2 ± 2.8     |
+---- TIMING ----
+Warmup: 2, Repeats: 5 (median)
+CPU     : 231.99 ms
+OPENCL  : 471.18 ms
 
-### Visualization
 
-The bar plot shows average execution time per kernel, with error bars representing standard deviation.
+Notes:
 
-![AXIR Bench](build/axir_bench.png)
+--buffer auto picks a likely output (e.g., hC, hOut).
 
+For large matrices you can relax tolerances: --atol 1e-3 --rtol 5e-6.
+
+Times include process + I/O overhead (good for gross comparisons, not micro-benchmarks).
+
+Included demos (prebaked AXIR)
+
+The repo ships AXIR JSONs such as:
+
+vector_add_from_{cuda,hip,opencl,sycl}.axir.json
+
+saxpy_from_{cuda,hip}.axir.json
+
+reduce_sum_from_{cuda,hip}.axir.json
+
+matmul_from_hip.axir.json
+
+All included demos pass CPU ↔ OpenCL verification on our test machine.
 
 Roadmap
-0–6 weeks (Core)
 
-AXIR v0.1 spec (types, memory, sync, intrinsics)
+0–6 weeks (Core):
 
-Conformance tests + compatibility matrix
+AXIR v0.1 spec (types/memory/sync/intrinsics), conformance tests
 
-Benchmark harness (CPU vs GPU-stub)
+Better codegen paths in frontends; CLI polish
 
-7–18 weeks (GPU)
+7–18 weeks (GPU):
 
-First real GPU backend (CUDA/PTX or ROCm)
+First real codegen backend (PTX or SPIR-V/Vulkan)
 
-At least 2 kernels run <2× slower than native
+Early perf targets (<2× from native) on a few kernels
 
-Notebook demo “multi-frontend → GPU”
+Subgraph demo on a real model fragment
 
-19–28 weeks (Portability)
+19–28 weeks (Portability):
 
-Backend SPIR-V (Vulkan/OpenCL path)
+Additional backends (ROCm, Vulkan/SPIR-V path)
 
-Cross-vendor benchmarks
+Cross-vendor perf + correctness matrix
 
-Landing page + docs
+Status & Disclaimer
 
-License
-Apache-2.0 (with CLA for contributions).
-
-
+This is an early PoC intended to demonstrate feasibility: translate unmodified CUDA/HIP to a small IR and run it across backends, with automated verification. Expect rough edges; contributions and issues are welcome.
