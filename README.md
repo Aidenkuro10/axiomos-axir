@@ -221,5 +221,10 @@ License
 
 TBD (PoC). Replace with MIT/Apache-2.0 once finalized.
 
-Contact
-If you’re interested in collaborating or exploring AXIR for your stack, open an issue or reach out via the profile email.
+ Contact
+
+**Pierre Seck**  
+✉️ Email: pierre.seck@unine.ch
+LinkedIn: www.linkedin.com/in/pierre-seck-0b9391381
+
+
